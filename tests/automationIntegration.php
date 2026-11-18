@@ -50,7 +50,7 @@ $rule = [ 'id' => str_repeat( 'a', 24 ), 'name' => 'Review', 'enabled' => true,
 	'selector' => 'regex', 'pattern' => '^Task/[0-9]+$', 'slot' => $slot, 'template' => $template,
 	'parameter' => 'Status', 'operator' => 'equals', 'value' => 'Code Review', 'actions' => [
 		[ 'option' => 'archive', 'values' => [] ], [ 'option' => 'task', 'values' => [
-			'display' => 'Review', 'type' => 'Review', 'projectMode' => 'source', 'project' => ''
+			'display' => 'Evaluatie [taaknummer]', 'status' => 'Gepland', 'type' => 'Review', 'projectMode' => 'source', 'project' => ''
 		] ]
 	] ];
 $write( Rules::page(), [ 'main' => new JsonContent( json_encode( [ 'schemaVersion' => 1, 'rules' => [ $rule ] ] ) ) ] );
@@ -98,6 +98,8 @@ $expect( $job->run(), 'follow-up job' );
 $target = 'Task/' . $row->event_id;
 $first = $rev( $target );
 $targetText = $first->getContent( $slot )->serialize();
+$expect( str_contains( $first->getContent( 'csp-base-props' )->serialize(), '|Title=Evaluatie 123' )
+	&& str_contains( $targetText, '|Status=Gepland' ), 'administrator title pattern and custom status' );
 $expect( str_contains( $targetText, '|Project=MinFin 2' ) && str_contains( $targetText, '|Task type=Review' ), 'source snapshot in created slots' );
 $expect( ( new ActionJob( null, [ 'event' => $row->event_id ] ) )->run() && $rev( $target )->getId() === $first->getId(),
 	'redelivery after target commit' );

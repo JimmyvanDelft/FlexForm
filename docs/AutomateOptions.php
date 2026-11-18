@@ -8,23 +8,25 @@ $wgFlexFormConfig['AutomateOptions'] = [
 		'fixed' => [ 'slot' => $properties, 'template' => 'Csp class properties', 'parameter' => 'Archived', 'value' => 'Yes' ]
 	],
 	'set' => [
-		'label' => 'Parameter instellen', 'type' => 'set', 'parameters' => [ 'Archived', 'Priority' ],
+		'label' => 'Parameter instellen', 'type' => 'set', 'parameters' => [ 'Archived', 'Priority', 'Status' ],
 		'fixed' => [ 'slot' => $properties, 'template' => 'Csp class properties' ],
-		'fields' => [ 'parameter' => [ 'choices' => [ 'Archived', 'Priority' ] ], 'value' => [] ]
+		'fields' => [ 'parameter' => [ 'choices' => [ 'Archived', 'Priority', 'Status' ] ], 'value' => [] ]
 	],
 	'task' => [
 		'label' => 'Taak aanmaken', 'type' => 'create', 'title' => 'Task/$event',
 		'fields' => [
-			'display' => [ 'label' => 'Weergavetitel' ], 'type' => [ 'label' => 'Taaktype' ],
+			'display' => [ 'label' => 'Titel nieuwe taak', 'help' => 'Bijvoorbeeld Afronding project of Evaluatie [taaknummer]. [brontitel] verwijst naar de volledige bronpagina.' ], 'type' => [ 'label' => 'Taaktype' ],
 			'projectMode' => [ 'label' => 'Projectbron', 'choices' => [ 'fixed', 'source' ] ],
-			'project' => [ 'label' => 'Vast project' ]
+			'project' => [ 'label' => 'Vast project' ],
+			'status' => [ 'label' => 'Status nieuwe taak', 'default' => 'Open' ]
 		],
+		'variables' => [ 'taaknummer' => 'number', 'brontitel' => 'title' ],
 		'inherit' => [ 'project' => [
 			'mode' => 'projectMode', 'slot' => $properties, 'template' => 'Csp class properties', 'parameter' => 'Project'
 		] ],
 		'slots' => [
 			$base => "{{Base properties\n|Class=Task\n|Title=\$display\n}}",
-			$properties => "{{Csp class properties\n|Task type=\$type\n|Project=\$project\n}}"
+			$properties => "{{Csp class properties\n|Task type=\$type\n|Status=\$status\n|Project=\$project\n}}"
 		]
 	]
 ];

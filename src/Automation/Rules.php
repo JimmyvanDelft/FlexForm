@@ -85,11 +85,12 @@ class Rules {
 			throw new InvalidArgumentException( 'Unexpected action field.' );
 		}
 		foreach ( $fields as $key => $field ) {
-			$value = $values[$key] ?? null;
+			$value = $values[$key] ?? $field['default'] ?? null;
 			if ( !is_string( $value ) || strlen( $value ) > 1024 ||
 				( isset( $field['choices'] ) && !in_array( $value, $field['choices'], true ) ) ) {
 				throw new InvalidArgumentException( "Invalid $key." );
 			}
+			$values[$key] = $value;
 		}
 		$args = ( $option['fixed'] ?? [] ) + $values;
 		if ( $option['type'] === 'set' && preg_match( '/[|{}<>\r\n]/u', $args['value'] ) ) {

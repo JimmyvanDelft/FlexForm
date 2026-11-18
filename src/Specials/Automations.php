@@ -199,9 +199,12 @@ class Automations {
 			$html = '';
 			foreach ( $option['fields'] ?? [] as $field => $spec ) {
 				$choices = $spec['choices'] ?? null;
-				$value = ( $action['option'] ?? '' ) === $key ? ( $action['values'][$field] ?? '' ) : '';
+				$value = ( $action['option'] ?? '' ) === $key ? ( $action['values'][$field] ?? $spec['default'] ?? '' ) : ( $spec['default'] ?? '' );
 				$html .= self::input( $spec['label'] ?? $field, $name . "[values][$key][$field]", $value,
 					$choices ? array_combine( $choices, $choices ) : null );
+				if ( isset( $spec['help'] ) ) {
+					$html .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $spec['help'] );
+				}
 			}
 			$row .= Html::rawElement( 'div', [ 'data-option' => $key ], $html );
 		}

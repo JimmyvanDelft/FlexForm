@@ -59,3 +59,13 @@ php maintenance/run.php "$PWD/extensions/FlexForm/tests/runAutomations.php" --di
 ```
 
 Deze test schrijft configuratie, pagina's en jobs in de testdatabase.
+
+## Vrij instelbare acties
+
+De beheerder kan **Parameter instellen** kiezen, een toegestane parameter selecteren en zelf de waarde invullen. Voeg de schrijfbare parameters toe aan zowel `parameters` als de `choices` van het parameterveld.
+
+**Taak aanmaken** is een algemene actie. De beheerder vult per regel de titel, het taaktype en de status in. Een titel kan bijvoorbeeld `Afronding project` of `Evaluatie [taaknummer]` zijn. Kies bij Projectbron `source` om het project uit de activerende bronbewerking over te nemen, of `fixed` om een eigen project in te vullen.
+
+De installatie maakt verwijzingen beschikbaar via `variables`. De sleutels worden tussen vierkante haken gebruikt. `number` levert het laatste deel van de bronpaginatitel en `title` de volledige titel inclusief namespace. Zo levert `Evaluatie [taaknummer]` bij `Task/123` de titel `Evaluatie 123`. De interne paginanaam blijft uniek via `Task/$event`.
+
+Met `fields` bepaalt de installatie welke waarden de beheerder vrij invult. Een `default` geeft ook bestaande regels zonder dat veld een waarde. Een optionele `help` verschijnt onder het veld. Vaste presets kunnen naast deze algemene acties blijven bestaan.

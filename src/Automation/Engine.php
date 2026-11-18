@@ -55,6 +55,15 @@ class Engine {
 			foreach ( $rule['actions'] as $index => $action ) {
 				$option = $options[$action['option']];
 				$args = Rules::arguments( $action, $options );
+				$variables = [];
+				foreach ( $option['variables'] ?? [] as $name => $source ) {
+					$variables['[' . $name . ']'] = match ( $source ) {
+						'title' => $title->getPrefixedText(),
+						'number' => substr( $title->getText(), strrpos( '/' . $title->getText(), '/' ) ),
+						default => throw new RuntimeException( 'Unknown automation variable source.' )
+					};
+				}
+				$args = array_map( static fn ( $value ) => strtr( $value, $variables ), $args );
 				if ( !$user->isRegistered() || !$user->definitelyCan( 'read', $title ) ) {
 					throw new RuntimeException( 'Automation requires an identified editor with read access.' );
 				}
