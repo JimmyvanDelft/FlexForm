@@ -27,5 +27,17 @@
 	"flexform-automation-failures": "Mislukte vervolgacties",
 	"flexform-automation-action": "Actie",
 	"flexform-automation-up": "Omhoog",
-	"flexform-automation-remove": "Actie verwijderen"
+	"flexform-automation-remove": "Actie verwijderen",
+	"flexform-automation-rules": "Regels",
+	"flexform-automation-disabled": "Uitgeschakeld",
+	"flexform-automation-empty": "Er zijn nog geen regels. Maak een nieuwe regel aan.",
+	"flexform-automation-editing": "Je bewerkt deze regel",
+	"flexform-automation-creating": "Nieuwe automatisering instellen",
+	"flexform-automation-saved": "De regel is opgeslagen.",
+	"flexform-automation-pages": "Voor welke pagina’s?",
+	"flexform-automation-pages-help": "Selecteer de doelpagina’s die het formulier bewerkt. Bijvoorbeeld Task/ of ^Task/[0-9]+$.",
+	"flexform-automation-condition": "Wanneer uitvoeren?",
+	"flexform-automation-condition-help": "De regel wordt uitgevoerd als deze templateparameter verandert en de nieuwe waarde aan de vergelijking voldoet.",
+	"flexform-automation-actions": "Wat moet er gebeuren?",
+	"flexform-automation-actions-help": "Voeg acties toe in de gewenste volgorde. Met Omhoog verplaats je een actie."
 }

@@ -127,5 +127,17 @@
 	"flexform-automation-up": "Label on the automation rule management form. English: Move up.",
 	"flexform-automation-remove": "Label on the automation rule management form. English: Remove action.",
 	"flexform-automations": "Name of the automation management section.",
-	"right-flexform-manage-automations": "Description of the permission to manage automation rules."
+	"right-flexform-manage-automations": "Description of the permission to manage automation rules.",
+	"flexform-automation-rules": "Automation management interface label or instruction.",
+	"flexform-automation-disabled": "Automation management interface label or instruction.",
+	"flexform-automation-empty": "Automation management interface label or instruction.",
+	"flexform-automation-editing": "Automation management interface label or instruction.",
+	"flexform-automation-creating": "Automation management interface label or instruction.",
+	"flexform-automation-saved": "Automation management interface label or instruction.",
+	"flexform-automation-pages": "Automation management interface label or instruction.",
+	"flexform-automation-pages-help": "Automation management interface label or instruction.",
+	"flexform-automation-condition": "Automation management interface label or instruction.",
+	"flexform-automation-condition-help": "Automation management interface label or instruction.",
+	"flexform-automation-actions": "Automation management interface label or instruction.",
+	"flexform-automation-actions-help": "Automation management interface label or instruction."
 }

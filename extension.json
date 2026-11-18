@@ -107,7 +107,7 @@
     "remoteExtPath": "FlexForm/Modules"
   },
   "ResourceModules": {
-    "ext.flexform.automations": { "scripts": "automations.js" },
+    "ext.flexform.automations": { "scripts": "automations.js", "styles": "automations.css" },
     "ext.wsForm.slim.scripts": {
       "scripts": "slim/slim/slim.kickstart.min.js",
       "position": "bottom"

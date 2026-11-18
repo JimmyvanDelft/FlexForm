@@ -30,7 +30,7 @@ class Automations {
 			}
 			$control = Html::rawElement( 'select', [ 'name' => $name ], $items );
 		}
-		return Html::rawElement( 'p', [], Html::rawElement( 'label', [], htmlspecialchars( $label ) . ' ' . $control ) );
+		return Html::rawElement( 'div', [ 'class' => 'ff-automation-field' ], Html::rawElement( 'label', [], Html::element( 'span', [], $label ) . $control ) );
 	}
 
 	public function show(): void {
@@ -102,32 +102,69 @@ class Automations {
 					if ( !$updater->getStatus()->isOK() ) {
 						throw new RuntimeException( $updater->getStatus()->getMessage()->text() );
 					}
-					$out->redirect( $url->getLocalURL() );
+					$out->redirect( $url->getLocalURL( $operation === 'save' ? [ 'id' => $rule['id'], 'saved' => 1 ] : [] ) );
 					return;
 				}
 			} catch ( \Exception $e ) {
 				$out->addHTML( Html::element( 'p', [ 'class' => 'error' ], $e->getMessage() ) );
 			}
 		}
-		foreach ( $rules as $item ) {
-			$out->addHTML( Html::rawElement( 'p', [], Html::element( 'a',
-				[ 'href' => $url->getLocalURL( [ 'id' => $item['id'] ] ) ], $item['name'] . ( $item['enabled'] ? ' ✓' : ' ✗' ) ) ) );
+		$navigation = Html::element( 'h2', [], $this->label( 'rules' ) );
+		$navigation .= Html::element( 'a', [
+			'href' => $url->getLocalURL(), 'class' => 'ff-automation-new'
+		], '+ ' . $this->label( 'new' ) );
+		if ( !$rules ) {
+			$navigation .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $this->label( 'empty' ) );
 		}
-		$out->addHTML( Html::element( 'a', [ 'href' => $url->getLocalURL() ], $this->label( 'new' ) ) );
+		foreach ( $rules as $item ) {
+			$active = $item['id'] === $id;
+			$navigation .= Html::rawElement( 'a', [
+				'href' => $url->getLocalURL( [ 'id' => $item['id'] ] ),
+				'class' => 'ff-automation-rule' . ( $active ? ' is-selected' : '' ),
+				'aria-current' => $active ? 'page' : null
+			], Html::element( 'strong', [], $item['name'] ) .
+				Html::element( 'span', [ 'class' => 'ff-automation-status' ],
+					$this->label( $item['enabled'] ? 'enabled' : 'disabled' ) ) .
+				Html::element( 'small', [], $item['pattern'] ) );
+		}
+		$out->addHTML( '<div class="ff-automations">' .
+			Html::rawElement( 'nav', [ 'class' => 'ff-automation-nav', 'aria-label' => $this->label( 'rules' ) ], $navigation ) .
+			'<div class="ff-automation-editor">' );
+		$out->addHTML( Html::element( 'p', [ 'class' => 'ff-automation-context' ],
+			$this->label( $id !== '' ? 'editing' : 'creating' ) ) .
+			Html::element( 'h2', [ 'class' => 'ff-automation-heading' ],
+				$id !== '' ? ( $rule['name'] ?? $this->label( 'new' ) ) : $this->label( 'new' ) ) );
+		if ( !$request->wasPosted() && $request->getBool( 'saved' ) ) {
+			$out->addHTML( Html::element( 'p', [ 'class' => 'ff-automation-success', 'role' => 'status' ], $this->label( 'saved' ) ) );
+		}
 		$form = Html::hidden( 'token', $user->getEditToken() ) . Html::hidden( 'base', $base ) . Html::hidden( 'id', $id );
+		$form .= '<section class="ff-automation-section">';
 		$form .= self::input( $this->label( 'name' ), 'name', $rule['name'] ?? '' );
 		$form .= Html::rawElement( 'label', [], Html::input( 'enabled', '1', 'checkbox',
 			[ 'checked' => $rule['enabled'] ?? true ] ) . ' ' . htmlspecialchars( $this->label( 'enabled' ) ) );
+		$form .= '</section><section class="ff-automation-section">';
+		$form .= Html::element( 'h3', [], $this->label( 'pages' ) );
+		$form .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $this->label( 'pages-help' ) );
 		$form .= self::input( $this->label( 'selector' ), 'selector', $rule['selector'] ?? 'prefix',
 			[ 'prefix' => $this->label( 'prefix' ), 'regex' => $this->label( 'regex' ) ] );
-		foreach ( [ 'pattern' => $this->label( 'pattern' ), 'slot' => $this->label( 'slot' ), 'template' => $this->label( 'template' ), 'parameter' => $this->label( 'parameter' ) ] as $key => $label ) {
-			$form .= self::input( $label, $key, $rule[$key] ?? '' );
+		$form .= self::input( $this->label( 'pattern' ), 'pattern', $rule['pattern'] ?? '' );
+		$form .= '<div class="ff-automation-test">';
+		$form .= self::input( $this->label( 'example' ), 'example', $request->getText( 'example' ) );
+		$form .= Html::element( 'button', [ 'name' => 'operation', 'value' => 'test' ], $this->label( 'test' ) );
+		$form .= '</div></section><section class="ff-automation-section">';
+		$form .= Html::element( 'h3', [], $this->label( 'condition' ) );
+		$form .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $this->label( 'condition-help' ) );
+		$form .= '<div class="ff-automation-grid">';
+		foreach ( [ 'slot', 'template', 'parameter' ] as $key ) {
+			$form .= self::input( $this->label( $key ), $key, $rule[$key] ?? '' );
 		}
+		$form .= '</div>';
 		$form .= self::input( $this->label( 'new-value' ), 'operator', $rule['operator'] ?? 'equals',
 			[ 'equals' => $this->label( 'equals' ), 'differs' => $this->label( 'differs' ), 'contains' => $this->label( 'contains' ) ] );
 		$form .= self::input( $this->label( 'comparison' ), 'value', $rule['value'] ?? '' );
-		$form .= self::input( $this->label( 'example' ), 'example', $request->getText( 'example' ) );
-		$form .= Html::element( 'button', [ 'name' => 'operation', 'value' => 'test' ], $this->label( 'test' ) );
+		$form .= '</section><section class="ff-automation-section">';
+		$form .= Html::element( 'h3', [], $this->label( 'actions' ) );
+		$form .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $this->label( 'actions-help' ) );
 		$rows = '';
 		foreach ( $rule['actions'] ?? [] as $index => $action ) {
 			$rows .= $this->action( $index, $action );
@@ -135,12 +172,16 @@ class Automations {
 		$form .= Html::rawElement( 'div', [ 'id' => 'ff-actions' ], $rows );
 		$form .= Html::rawElement( 'template', [ 'id' => 'ff-action-template' ], $this->action( 'INDEX', [] ) );
 		$form .= Html::element( 'button', [ 'type' => 'button', 'id' => 'ff-add' ], $this->label( 'add-action' ) );
-		$form .= Html::element( 'button', [ 'name' => 'operation', 'value' => 'save' ], $this->label( 'save' ) );
+		$form .= '</section><div class="ff-automation-footer">';
+		$form .= Html::element( 'button', [ 'class' => 'ff-automation-primary', 'name' => 'operation', 'value' => 'save' ], $this->label( 'save' ) );
 		if ( $id !== '' ) {
-			$form .= Html::element( 'button', [ 'name' => 'operation', 'value' => 'delete' ], $this->label( 'delete' ) );
+			$form .= Html::element( 'button', [ 'class' => 'ff-automation-delete', 'name' => 'operation', 'value' => 'delete' ], $this->label( 'delete' ) );
 		}
+		$form .= '</div>';
 		$out->addHTML( Html::rawElement( 'form', [ 'method' => 'post', 'action' => $url->getLocalURL() ], $form ) );
 		$out->addModules( 'ext.flexform.automations' );
+		$out->addModuleStyles( 'ext.flexform.automations' );
+		$out->addHTML( '</div></div>' );
 		$out->addHTML( Html::element( 'h2', [], $this->label( 'failures' ) ) );
 		foreach ( Events::db()->select( Events::TABLE, [ 'event_id', 'error' ], [ 'state' => 'failed' ],
 			__METHOD__, [ 'LIMIT' => 50, 'ORDER BY' => 'finished_at DESC' ] ) as $failure ) {
@@ -151,7 +192,8 @@ class Automations {
 	private function action( $index, array $action ): string {
 		$name = "actions[$index]";
 		$labels = array_column( $this->options, 'label' );
-		$row = self::input( $this->label( 'action' ), $name . '[option]', $action['option'] ?? '',
+		$row = Html::element( 'legend', [ 'class' => 'ff-automation-action-title' ], $this->label( 'action' ) );
+		$row .= self::input( $this->label( 'action' ), $name . '[option]', $action['option'] ?? '',
 			array_combine( array_keys( $this->options ), $labels ) );
 		foreach ( $this->options as $key => $option ) {
 			$html = '';
@@ -165,6 +207,6 @@ class Automations {
 		}
 		$row .= Html::element( 'button', [ 'type' => 'button', 'class' => 'ff-up' ], $this->label( 'up' ) );
 		$row .= Html::element( 'button', [ 'type' => 'button', 'class' => 'ff-remove' ], $this->label( 'remove' ) );
-		return Html::rawElement( 'fieldset', [], $row );
+		return Html::rawElement( 'fieldset', [ 'class' => 'ff-automation-action' ], $row );
 	}
 }

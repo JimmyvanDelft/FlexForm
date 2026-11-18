@@ -228,5 +228,17 @@
 	"flexform-automation-failures": "Failed follow-up actions",
 	"flexform-automation-action": "Action",
 	"flexform-automation-up": "Move up",
-	"flexform-automation-remove": "Remove action"
+	"flexform-automation-remove": "Remove action",
+	"flexform-automation-rules": "Rules",
+	"flexform-automation-disabled": "Disabled",
+	"flexform-automation-empty": "No rules yet. Create a new rule.",
+	"flexform-automation-editing": "Editing this rule",
+	"flexform-automation-creating": "Create an automation",
+	"flexform-automation-saved": "The rule has been saved.",
+	"flexform-automation-pages": "Which pages?",
+	"flexform-automation-pages-help": "Select the target pages edited by the form. For example Task/ or ^Task/[0-9]+$.",
+	"flexform-automation-condition": "When to run?",
+	"flexform-automation-condition-help": "Run when this template parameter changes and its new value matches the condition.",
+	"flexform-automation-actions": "What should happen?",
+	"flexform-automation-actions-help": "Add actions in the desired order. Use Move up to reorder an action."
 }

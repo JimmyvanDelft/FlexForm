@@ -3,7 +3,10 @@
 	if ( !rows ) {
 		return;
 	}
-	let index = rows.children.length;
+	let index = Array.from( rows.querySelectorAll( '[name]' ) ).reduce( ( maximum, field ) => {
+		const match = field.name.match( /^actions\[(\d+)\]/ );
+		return match ? Math.max( maximum, Number( match[ 1 ] ) + 1 ) : maximum;
+	}, 0 );
 	function update( row ) {
 		const option = row.querySelector( 'select' ).value;
 		row.querySelectorAll( '[data-option]' ).forEach( ( group ) => {
