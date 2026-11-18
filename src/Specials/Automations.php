@@ -51,7 +51,7 @@ class Automations {
 		$rules = Rules::load( $revision );
 		$byId = array_column( $rules, null, 'id' );
 		$id = $request->getText( 'id' );
-		$rule = $byId[$id] ?? [];
+		$rule = $byId[$id] ?? Rules::defaults();
 		$base = $revision ? $revision->getId() : 0;
 		if ( $request->wasPosted() ) {
 			try {
@@ -67,7 +67,7 @@ class Automations {
 					$rule = [ 'id' => $id ?: bin2hex( random_bytes( 12 ) ),
 						'enabled' => $request->getBool( 'enabled' ), 'actions' => [] ];
 					foreach ( [ 'name', 'selector', 'pattern', 'slot', 'template', 'parameter', 'operator', 'value' ] as $key ) {
-						$rule[$key] = $request->getText( $key );
+						$rule[$key] = $request->getText( $key, $byId[$id][$key] ?? Rules::defaults()[$key] ?? '' );
 					}
 					foreach ( $request->getArray( 'actions', [] ) as $action ) {
 						$key = $action['option'];
@@ -156,11 +156,16 @@ class Automations {
 		$form .= '</div></section><section class="ff-automation-section">';
 		$form .= Html::element( 'h3', [], $this->label( 'condition' ) );
 		$form .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $this->label( 'condition-help' ) );
-		$form .= '<div class="ff-automation-grid">';
-		foreach ( [ 'slot', 'template', 'parameter' ] as $key ) {
-			$form .= self::input( $this->label( $key ), $key, $rule[$key] ?? '' );
+		$form .= self::input( $this->label( 'parameter' ), 'parameter', $rule['parameter'] ?? '' );
+		$advanced = Html::element( 'summary', [], $this->label( 'advanced' ) );
+		$advanced .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $this->label( 'advanced-help' ) );
+		foreach ( [ 'slot', 'template' ] as $key ) {
+			$advanced .= self::input( $this->label( $key ), $key, $rule[$key] ?? '' );
 		}
-		$form .= '</div>';
+		$form .= Html::rawElement( 'details', [
+			'class' => 'ff-automation-advanced',
+			'open' => empty( $rule['slot'] ) || empty( $rule['template'] )
+		], $advanced );
 		$form .= self::input( $this->label( 'new-value' ), 'operator', $rule['operator'] ?? 'equals',
 			[ 'equals' => $this->label( 'equals' ), 'differs' => $this->label( 'differs' ), 'contains' => $this->label( 'contains' ) ] );
 		$form .= self::input( $this->label( 'comparison' ), 'value', $rule['value'] ?? '' );

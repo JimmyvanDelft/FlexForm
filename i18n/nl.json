@@ -39,5 +39,7 @@
 	"flexform-automation-condition": "Wanneer uitvoeren?",
 	"flexform-automation-condition-help": "De regel wordt uitgevoerd als deze templateparameter verandert en de nieuwe waarde aan de vergelijking voldoet.",
 	"flexform-automation-actions": "Wat moet er gebeuren?",
-	"flexform-automation-actions-help": "Voeg acties toe in de gewenste volgorde. Met Omhoog verplaats je een actie."
+	"flexform-automation-actions-help": "Voeg acties toe in de gewenste volgorde. Met Omhoog verplaats je een actie.",
+	"flexform-automation-advanced": "Geavanceerde instellingen",
+	"flexform-automation-advanced-help": "Slot en template zijn vooraf ingesteld. Behoud deze waarden, tenzij je voor een geavanceerde instelling een andere gegevensbron wilt gebruiken."
 }

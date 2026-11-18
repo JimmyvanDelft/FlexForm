@@ -2,6 +2,10 @@
 // Include after wfLoadExtension( 'FlexForm' ). Use slot roles registered on your wiki.
 $properties = 'csp-class-props';
 $base = 'csp-base-props';
+$wgFlexFormConfig['AutomateDefaults'] = [
+	'slot' => $properties,
+	'template' => 'Csp class properties',
+];
 $wgFlexFormConfig['AutomateOptions'] = [
 	'archive' => [
 		'label' => 'Archiveren', 'type' => 'set', 'parameters' => [ 'Archived' ],

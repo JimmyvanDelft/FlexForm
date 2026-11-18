@@ -12,6 +12,11 @@ class Rules {
 		return MediaWikiServices::getInstance()->getMainConfig()->get( 'FlexFormConfig' )['AutomateOptions'] ?? [];
 	}
 
+	public static function defaults(): array {
+		$config = MediaWikiServices::getInstance()->getMainConfig()->get( 'FlexFormConfig' );
+		return array_intersect_key( $config['AutomateDefaults'] ?? [], [ 'slot' => true, 'template' => true ] );
+	}
+
 	public static function title() {
 		return \Title::makeTitle( NS_PROJECT, 'FlexForm/Automations.json' );
 	}

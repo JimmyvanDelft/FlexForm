@@ -154,6 +154,21 @@ $form = static function ( array $data, $actor ) {
 	$special->execute( 'automations' );
 	return $context->getOutput();
 };
+$newContext = new RequestContext();
+$newContext->setUser( $user );
+$newContext->setRequest( new FauxRequest() );
+$newSpecial = new \FlexForm\Specials\SpecialFlexForm();
+$newSpecial->setContext( $newContext );
+$newContext->setTitle( $newSpecial->getPageTitle( 'automations' ) );
+$newSpecial->execute( 'automations' );
+$html = $newContext->getOutput()->getHTML();
+$dom = new DOMDocument();
+@$dom->loadHTML( '<meta charset="utf-8">' . $html );
+$xpath = new DOMXPath( $dom );
+$expect( $xpath->query( '//input[@name="slot" and @value="csp-class-props"]' )->length === 1 &&
+	$xpath->query( '//input[@name="template" and @value="Csp class properties"]' )->length === 1 &&
+	$xpath->query( '//details[@class="ff-automation-advanced" and not(@open)]' )->length === 1,
+	'new rule prefilled with collapsed advanced settings' );
 $post = $rule;
 $post['actions'] = [ [ 'option' => 'archive' ] ];
 $post['token'] = $user->getEditToken();

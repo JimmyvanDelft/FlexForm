@@ -240,5 +240,7 @@
 	"flexform-automation-condition": "When to run?",
 	"flexform-automation-condition-help": "Run when this template parameter changes and its new value matches the condition.",
 	"flexform-automation-actions": "What should happen?",
-	"flexform-automation-actions-help": "Add actions in the desired order. Use Move up to reorder an action."
+	"flexform-automation-actions-help": "Add actions in the desired order. Use Move up to reorder an action.",
+	"flexform-automation-advanced": "Advanced settings",
+	"flexform-automation-advanced-help": "Slot and template are preconfigured. Keep these values unless an advanced configuration requires a different data source."
 }

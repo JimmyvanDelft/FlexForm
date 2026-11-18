@@ -139,5 +139,7 @@
 	"flexform-automation-condition": "Automation management interface label or instruction.",
 	"flexform-automation-condition-help": "Automation management interface label or instruction.",
 	"flexform-automation-actions": "Automation management interface label or instruction.",
-	"flexform-automation-actions-help": "Automation management interface label or instruction."
+	"flexform-automation-actions-help": "Automation management interface label or instruction.",
+	"flexform-automation-advanced": "Label or instruction for advanced automation condition settings.",
+	"flexform-automation-advanced-help": "Label or instruction for advanced automation condition settings."
 }

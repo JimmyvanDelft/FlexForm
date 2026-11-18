@@ -109,3 +109,12 @@
 	.ff-automation-test { flex-wrap: wrap; }
 	.ff-automation-section { padding: 18px; }
 }
+.ff-automation-advanced {
+	margin: 8px 0 20px;
+	padding: 12px 16px;
+	background: var(--background-color-interactive-subtle, #f8f9fa);
+	border: 1px solid var(--border-color-subtle, #c8ccd1);
+	border-radius: 4px;
+}
+.ff-automation-advanced summary { cursor: pointer; font-weight: 600; }
+.ff-automation-advanced[open] summary { margin-bottom: 12px; }

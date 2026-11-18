@@ -113,3 +113,18 @@ Een textarea overschrijft voor zijn doelslot de inhoud uit de vaste `slots`-map.
 Textarea-inhoud heeft een limiet van 65.536 bytes. Gewone tekstvelden behouden hun limiet van 1.024 bytes en de bestaande controles op wikitextstructuur. Ruwe inhoud wordt buiten de gewone tekstsubstituties gehouden en kan daardoor geen titel of andere templateparameters invullen.
 
 Bestaande configuratie en regels blijven werken. Geef een nieuw veld een `default` als oudere regels het veld nog missen. Beide mogelijkheden gebruiken dezelfde rechtencontroles, bronrevisietransactie en idempotente vervolgjob als bestaande acties. De reeds opgeslagen jobinhoud blijft een momentopname van de activerende bewerking.
+
+## Standaardgegevensbron voor condities
+
+Stel het slot en de template van nieuwe regels in via LocalSettings.php:
+
+```php
+$wgFlexFormConfig['AutomateDefaults'] = [
+	'slot' => 'csp-class-props',
+	'template' => 'Csp class properties',
+];
+```
+
+De beheerder vult dan alleen de te controleren parameter en vergelijking in. Slot en template staan vooraf ingevuld onder **Geavanceerde instellingen**, met de uitleg om deze waarden normaal te behouden. Zonder volledige standaardwaarden opent dit onderdeel automatisch. De beheerder kan beide waarden aanpassen.
+
+Nieuwe regels slaan de gekozen waarden expliciet op. Een latere aanpassing van de defaults verandert bestaande regels niet. Voor actieopties blijven slot en template ingesteld via hun eigen `fixed`-configuratie.
