@@ -1,0 +1,13 @@
+CREATE TABLE /*_*/flexform_event (
+  event_id VARCHAR(80) NOT NULL PRIMARY KEY,
+  source_rev BIGINT NOT NULL,
+  rule_id VARCHAR(32) NOT NULL,
+  state VARCHAR(12) NOT NULL,
+  queued_at BIGINT NOT NULL,
+  started_at BIGINT NULL,
+  finished_at BIGINT NULL,
+  payload MEDIUMBLOB NOT NULL,
+  error TEXT NULL,
+  INDEX state_queue (state, queued_at),
+  INDEX state_finish (state, finished_at)
+) /*$wgDBTableOptions*/;

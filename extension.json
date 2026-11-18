@@ -43,6 +43,7 @@
       "FlexForm\\Core\\Rights::hideSource"
     ],
     "getUserPermissionsErrors": [
+      "FlexForm\\Automation\\Rules::protect",
       "FlexForm\\Core\\Rights::disableActions"
     ]
   },
@@ -55,8 +56,11 @@
     "FlexForm.ServiceWiring.php"
   ],
 
+  "AvailableRights": [ "flexform-manage-automations" ],
+  "GroupPermissions": { "sysop": { "flexform-manage-automations": true } },
   "config": {
     "FlexFormConfig": {
+      "AutomateOptions": {},
       "file_temp_path": "",
       "rc_use": "v3",
       "rc_site_key": "",
@@ -103,6 +107,7 @@
     "remoteExtPath": "FlexForm/Modules"
   },
   "ResourceModules": {
+    "ext.flexform.automations": { "scripts": "automations.js" },
     "ext.wsForm.slim.scripts": {
       "scripts": "slim/slim/slim.kickstart.min.js",
       "position": "bottom"
@@ -163,6 +168,7 @@
     }
   },
   "JobClasses": {
+    "FlexFormAutomation": "FlexForm\\Automation\\ActionJob",
     "FlexFormEdit": "\\FlexForm\\Processors\\Content\\Jobs\\FlexFormEditJob"
   },
   "SpecialPages": {

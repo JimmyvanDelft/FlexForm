@@ -520,6 +520,7 @@ class Edit {
 				// Does this field exist in the current form that we can use ?
 				if ( !isset( $_POST[$ff] ) ) {
 					$data[$pid][$t]['value'] = '';
+					$data[$pid][$t]['absent'] = true;
 				} else {
 					// The value will be grabbed from the form
 					// But first check if this is an array
@@ -708,11 +709,25 @@ class Edit {
 			$t++;
 		}
 		$pageContents[ $pid ][ $slotToEdit ]['content'] = str_replace(
-			'{{' . $edit['template'] . $templateContent,
-				$newTemplateContent,
+			'{{' . $edit['template'] . $templateContent . '}}',
+				$newTemplateContent . '}}',
 				$pageContents[ $pid ][ $slotToEdit ]['content']
 			);
 
+	}
+
+	public function setParameter( string $source, array $args ): string {
+		if ( $this->getTemplate( $source, $args['template'] ) === false ) {
+			throw new FlexFormException( 'Automation target template is missing or ambiguous.' );
+		}
+		$pages = [ [ 'main' => [ 'content' => $source ] ] ];
+		$result = [];
+		$used = [];
+		$this->actualWikiEdit( [
+			'slot' => 'main', 'find' => false, 'template' => $args['template'],
+			'variable' => $args['parameter'], 'value' => $args['value']
+		], 0, $pages, $result, $used );
+		return $pages[0]['main']['content'];
 	}
 
 	/**
@@ -1009,6 +1024,7 @@ class Edit {
 					}
 
 					$pageContents[$pid][$edit['slot']]['title'] = $content['title'];
+					$pageContents[$pid][$edit['slot']]['baseRevision'] = $content['baseRevision'];
 				} elseif ( !isset( $pageContents[$pid]['main'] ) ) {
 					$pageContents[$pid]['main'] = $render->getSlotContent( $pid );
 					if ( Config::isDebug() ) {
@@ -1031,6 +1047,13 @@ class Edit {
 			$result = [];
 			foreach ( $edits as $edit ) {
 				$format = $edit['format'];
+				if ( $format === 'wiki' && \FlexForm\Automation\Rules::options() ) {
+					if ( !empty( $edit['absent'] ) ) {
+						continue;
+					}
+					$slot = $edit['slot'] ?: 'main';
+					$pageContents[$pid][$slot]['submitted'][$edit['template']][$edit['variable']] = true;
+				}
 				switch ( $format ) {
 					case "json":
 						$this->actualJSONEdit( $edit, $pid, $pageContents, $result, $usedVariables );

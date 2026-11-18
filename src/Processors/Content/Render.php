@@ -175,6 +175,7 @@ class Render {
 
 		$ret['title']    = $page->getTitle()->getFullText();
 		$latest_revision = $page->getRevisionRecord();
+		$ret['baseRevision'] = $latest_revision ? $latest_revision->getId() : 0;
 		if ( $latest_revision === null ) {
 			return $ret;
 		}

@@ -10,7 +10,6 @@
 
 namespace FlexForm\Processors\Content\Jobs;
 
-use FlexForm\Core\HandleResponse;
 use FlexForm\Processors\Content\ContentCore;
 use Job;
 
@@ -31,17 +30,25 @@ class FlexFormEditJob extends Job {
 	public function run() {
 		$pageId = $this->params['pageId'];
 		$pData = $this->params['edits'];
-		ContentCore::$isJob = true;
-		ContentCore::$jobData = [ $pageId => $pData ];
-		ContentCore::$jobSummary = 'FFJOB: ' . $this->params['summary'];
-		ContentCore::$jobUser = $this->params['user'];
-		FlexFormJobLogger::logInfo( 'CREATE: FlexFormEditJob.php: Running job for Page ID : ' . $pageId, $pData );
-		$responseHandler = new handleResponse();
+		$user = $this->params['user'];
+		if ( !empty( $this->params['userId'] ) ) {
+			$user = \MediaWiki\MediaWikiServices::getInstance()->getUserFactory()
+				->newFromId( $this->params['userId'] )->getName();
+		}
 		try {
-			ContentCore::saveToWiki( $responseHandler );
+			$write = function () use ( $pageId, $pData, $user ) {
+				ContentCore::runEditJob( $pageId, $pData, $this->params['summary'], $user );
+			};
+			if ( isset( $this->params['delivery'] ) && \FlexForm\Automation\Rules::options() ) {
+				\FlexForm\Automation\Events::once( $this->params['delivery'], $write );
+			} else {
+				$write();
+			}
+			return true;
 		} catch ( \Throwable $e ) {
-			FlexFormJobLogger::logError( 'CREATE: FlexFormEditJob.php: Running job error for PageId : '
-				. $pageId . '. Error: ' . $e->getMessage() );
+			$this->setLastError( $e->getMessage() );
+			FlexFormJobLogger::logError( 'Failed edit job for ' . $pageId . ': ' . $e->getMessage() );
+			return false;
 		}
 	}
 }

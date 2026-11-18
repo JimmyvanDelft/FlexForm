@@ -61,9 +61,22 @@ class ContentCore {
 	 */
 	private static int $fileNumber = 0;
 
-	/**
-	 * @return array
-	 */
+	public static function runEditJob( $page, array $edits, string $summary, string $user ): void {
+		$fields = self::$fields;
+		self::$fields = [];
+		self::$isJob = true;
+		self::$jobData = [ $page => $edits ];
+		self::$jobUser = $user;
+		self::$jobSummary = 'FFJOB: ' . $summary;
+		try {
+			self::saveToWiki( new HandleResponse() );
+		} finally {
+			self::$isJob = false;
+			self::$jobData = [];
+			self::$fields = $fields;
+		}
+	}
+
 	public static function getFields(): array {
 		return self::$fields;
 	}
@@ -455,7 +468,7 @@ class ContentCore {
 		// WSEdits
 		if ( self::$isJob || self::$fields['mwedit'] !== false ) {
 			$timer = new DebugTimer();
-			$debugTitle = '<b>::' . get_class() . '::</b> ';
+			$debugTitle = '<b>::' . self::class . '::</b> ';
 
 			$save = new Save();
 			if ( isset( self::$fields['ffJob'] ) ) {
@@ -480,7 +493,11 @@ class ContentCore {
 			if ( !empty( $pageContents ) ) {
 				foreach ( $pageContents as $pageContent ) {
 					$slotContentArray = [];
+					$submitted = [];
+					$bases = [];
 					foreach ( $pageContent as $slotName => $singlePage ) {
+						$bases[] = $singlePage['baseRevision'];
+						$submitted[$slotName] = $singlePage['submitted'] ?? [];
 						$slotContents = $singlePage['content'];
 						$pTitle = $singlePage['title'];
 						$slotContentArray[$slotName] = $slotContents;
@@ -495,7 +512,8 @@ class ContentCore {
 						$save->saveToWiki(
 							$pTitle,
 							$slotContentArray,
-							self::$fields['summary']
+							self::$fields['summary'], true,
+							\FlexForm\Automation\Rules::options() ? [ 'bases' => $bases, 'fields' => $submitted ] : null
 						);
 					} catch ( FlexFormException $e ) {
 						throw new FlexFormException(

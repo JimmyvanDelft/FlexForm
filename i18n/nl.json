@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"flexform-automations": "Automatiseringen",
+	"right-flexform-manage-automations": "FlexForm-automatiseringen beheren",
+	"flexform-automation-new": "Nieuwe regel",
+	"flexform-automation-name": "Naam",
+	"flexform-automation-enabled": "Ingeschakeld",
+	"flexform-automation-selector": "Paginaselector",
+	"flexform-automation-prefix": "Titel begint met",
+	"flexform-automation-regex": "Reguliere expressie",
+	"flexform-automation-pattern": "Patroon",
+	"flexform-automation-slot": "Slot",
+	"flexform-automation-template": "Template",
+	"flexform-automation-parameter": "Parameter",
+	"flexform-automation-new-value": "Nieuwe waarde",
+	"flexform-automation-equals": "Gelijk aan",
+	"flexform-automation-differs": "Ongelijk aan",
+	"flexform-automation-contains": "Bevat",
+	"flexform-automation-comparison": "Vergelijkingswaarde",
+	"flexform-automation-example": "Voorbeeldtitel",
+	"flexform-automation-test": "Test selector",
+	"flexform-automation-add-action": "Actie toevoegen",
+	"flexform-automation-save": "Opslaan",
+	"flexform-automation-delete": "Regel verwijderen",
+	"flexform-automation-failures": "Mislukte vervolgacties",
+	"flexform-automation-action": "Actie",
+	"flexform-automation-up": "Omhoog",
+	"flexform-automation-remove": "Actie verwijderen"
+}

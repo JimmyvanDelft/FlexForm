@@ -47,6 +47,7 @@ class Sql {
 			$dbt = 'sql';
 		}
 		$directory = __DIR__ . "/../../sql";
+		$updater->addExtensionTable( 'flexform_event', $directory . '/AutomationEvents.mysql' );
 		$tables = $directory . "/FlexForm.$dbt";
 		if ( file_exists( $tables ) ) {
 			$updater->addExtensionUpdate( [

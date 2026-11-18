@@ -23,12 +23,14 @@ class FlexFormEditJobScheduler {
 	 */
 	public function addFlexFormEditJob( array $edits, string $summary, string $user ): void {
 		$jobQueueGroup = MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup();
+		$actor = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $user );
 		foreach ( $edits as $pId => $pData ) {
 			FlexFormJobLogger::logInfo( 'CREATE: FlexFormEditJobScheduler.php: Creating job for Page ID: ' .
 				$pId . '. For user: ' . $user . '. With data: ' . print_r( $pData, true ),
 				$pData );
 			$job = new FlexFormEditJob( "",
-				[ 'pageId' => $pId, 'edits' => $pData, 'summary' => $summary, 'user' => $user ] );
+				[ 'delivery' => bin2hex( random_bytes( 16 ) ), 'userId' => $actor ? $actor->getId() : 0,
+				  'pageId' => $pId, 'edits' => $pData, 'summary' => $summary, 'user' => $user ] );
 			$jobQueueGroup->push( $job );
 		}
 	}

@@ -178,6 +178,11 @@ class SpecialFlexForm extends SpecialPage {
 	public function execute( $sub ) {
 		global $IP, $wgScript, $wgServer;
 		$thisUser = $this->getUser();
+		if ( $sub === 'automations' ) {
+			$this->setHeaders();
+			( new Automations( $this ) )->show();
+			return;
+		}
 		if ( $this->getPostString(
 				'mwtoken'
 			) || ( isset ( $_GET['action'] ) && $_GET['action'] === 'handleExternalRequest' ) ) {
@@ -194,6 +199,10 @@ class SpecialFlexForm extends SpecialPage {
 			$wgScript
 		);
 		$out = $this->getOutput();
+		if ( \FlexForm\Automation\Rules::options() && $thisUser->isAllowed( \FlexForm\Automation\Rules::RIGHT ) ) {
+			$out->addHTML( \MediaWiki\Html\Html::element( 'a', [ 'href' => $this->getPageTitle( 'automations' )->getLocalURL() ],
+				$this->msg( 'flexform-automations' )->text() ) );
+		}
 		FlexForm\Core\Config::setConfigFromMW();
 		$groups = FlexForm\Core\Config::getConfigVariable( 'allowedGroups' );
 		$userAllowed = true;

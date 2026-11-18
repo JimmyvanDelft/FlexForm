@@ -2,6 +2,9 @@
 
 namespace FlexForm\Processors\Content;
 
+use FlexForm\Automation\Engine;
+use FlexForm\Automation\Events;
+use FlexForm\Automation\Rules;
 use CommentStoreComment;
 use ContentHandler;
 use Exception;
@@ -63,13 +66,28 @@ class Save {
 		User $user,
 		WikiPage $wikipage_object,
 		array $text,
-		string $summary
+		string $summary,
+		?array $automation = null,
+		bool $createOnly = false
 	) {
 		$status              = true;
 		$errors              = [];
 		$title_object        = $wikipage_object->getTitle();
 		$page_updater        = $wikipage_object->newPageUpdater( $user );
-		$old_revision_record = $wikipage_object->getRevisionRecord();
+		$old_revision_record = $page_updater->grabParentRevision();
+		$jobs = [];
+		if ( $createOnly && $old_revision_record ) {
+			throw new FlexFormException( 'Automation target already exists.' );
+		}
+		if ( $automation !== null ) {
+			foreach ( $automation['bases'] as $base ) {
+				if ( !$old_revision_record || $old_revision_record->getId() !== $base ) {
+					throw new FlexFormException( 'Edit conflict. Reload the page.' );
+				}
+			}
+			$engine = new Engine( $old_revision_record, $text, $automation['fields'] );
+			$jobs = $engine->apply( $title_object, $user, $text );
+		}
 		$slot_role_registry  = MediaWikiServices::getInstance()->getSlotRoleRegistry();
 		$mainContentText     = '';
 
@@ -175,11 +193,17 @@ class Save {
 		if ( Config::isDebug() ) {
 			$timer = new DebugTimer();
 		}
+		if ( !$status && ( $automation !== null || $createOnly ) ) {
+			return $errors;
+		}
 		$comment = CommentStoreComment::newUnsavedComment( $summary );
 		$result = $page_updater->saveRevision(
 			$comment,
-			EDIT_INTERNAL
+			EDIT_INTERNAL | ( $createOnly ? EDIT_NEW : 0 )
 		);
+		if ( $jobs && $page_updater->wasRevisionCreated() && $page_updater->getStatus()->isOK() ) {
+			Events::record( $result->getId(), $jobs );
+		}
 
 		if ( Config::isDebug() ) {
 			$res = "true";
@@ -247,6 +271,16 @@ class Save {
 			return true;
 		} else {
 			return $errors;
+		}
+	}
+
+	public function createForAutomation( User $user, $title, array $slots, string $summary ): void {
+		Engine::authorize( $user, $title, 'edit' );
+		Engine::authorize( $user, $title, 'create' );
+		$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
+		$result = $this->editSlots( $user, $page, $slots, $summary, null, true );
+		if ( $result !== true ) {
+			throw new FlexFormException( 'Automation page creation failed: ' . implode( ', ', $result ) );
 		}
 	}
 
@@ -364,7 +398,7 @@ class Save {
 	 * @throws FlexFormException
 	 * @throws MWContentSerializationException
 	 */
-	public function saveToWiki( string $title, array $contentArray, string $summary, bool $overWrite = true ) {
+	public function saveToWiki( string $title, array $contentArray, string $summary, bool $overWrite = true, ?array $automation = null ) {
 		if ( ContentCore::$isJob ) {
 			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName( ContentCore::$jobUser );
 			FlexFormJobLogger::logInfo( 'JOB: Save.php: Getting user from Job' );
@@ -398,6 +432,9 @@ class Save {
 				[],
 				$timer->getDuration()
 			);
+		}
+		if ( $titleObject->equals( Rules::title() ) && !$user->isAllowed( Rules::RIGHT ) ) {
+			throw new FlexFormException( 'Automation management permission required.' );
 		}
 		$canEdit = MediaWikiServices::getInstance()->getPermissionManager()->userCan( 'edit', $user, $titleObject );
 		$canCreate = MediaWikiServices::getInstance()->getPermissionManager()->userCan( 'create', $user, $titleObject );
@@ -464,12 +501,8 @@ class Save {
 		if ( Config::isDebug() ) {
 			$timer = new DebugTimer();
 		}
-		$saveResult = $this->editSlots(
-			$user,
-			$wikiPageObject,
-			$contentArray,
-			$summary
-		);
+		$write = fn () => $this->editSlots( $user, $wikiPageObject, $contentArray, $summary, $automation );
+		$saveResult = $automation === null ? $write() : Events::atomic( $write );
 		if ( ContentCore::$isJob ) {
 			FlexFormJobLogger::logInfo( 'JOB: Save.php: EditSlotResult is : ' .
 				print_r( $saveResult, true ),
