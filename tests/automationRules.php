@@ -39,3 +39,22 @@ check( rejects( fn () => Rules::arguments( [ 'option' => 'set', 'values' => [ 'p
 	'parameter allowlist' );
 check( rejects( fn () => Rules::arguments( [ 'option' => 'set', 'values' => [ 'parameter' => 'Archived', 'value' => 'x|Other=y' ] ], $options ) ),
 	'plain-text value cannot add a parameter' );
+
+$free = $options;
+$free['set']['allowAnyParameter'] = true;
+unset( $free['set']['fields']['parameter']['choices'] );
+check( Rules::arguments( [ 'option' => 'set', 'values' => [ 'parameter' => 'Custom field', 'value' => 'Yes' ] ], $free )['parameter'] === 'Custom field',
+	'explicit free parameter configuration' );
+foreach ( [ '', 'Other=x', "Bad\nname", 'x|Other', '{{x}}' ] as $parameter ) {
+	check( rejects( fn () => Rules::arguments( [ 'option' => 'set',
+		'values' => [ 'parameter' => $parameter, 'value' => 'x' ] ], $free ) ), 'reject structural parameter name ' . json_encode( $parameter ) );
+}
+$options['raw'] = [ 'type' => 'create', 'fields' => [
+	'body' => [ 'type' => 'textarea', 'slot' => 'main', 'default' => '' ]
+] ];
+$body = "{{Example\n|Value=Yes\n}}\n\n== Details ==\n* Item";
+check( Rules::arguments( [ 'option' => 'raw', 'values' => [ 'body' => $body ] ], $options )['body'] === $body,
+	'multiline wikitext accepted for configured slot' );
+check( Rules::arguments( [ 'option' => 'raw' ], $options )['body'] === '', 'textarea default for older rules' );
+check( rejects( fn () => Rules::arguments( [ 'option' => 'raw', 'values' => [ 'body' => str_repeat( 'x', 65537 ) ] ], $options ) ),
+	'textarea length bound' );

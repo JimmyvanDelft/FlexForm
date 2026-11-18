@@ -59,7 +59,7 @@
 .ff-automation-field { margin-bottom: 16px; min-width: 0; }
 .ff-automation-field label { display: block; }
 .ff-automation-field label > span { display: block; margin-bottom: 6px; font-weight: 600; }
-.ff-automation-field input, .ff-automation-field select {
+.ff-automation-field input, .ff-automation-field select, .ff-automation-field textarea {
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 36px;
@@ -70,7 +70,8 @@
 	background: var(--background-color-base, #fff);
 	font: inherit;
 }
-.ff-automations input:focus, .ff-automations select:focus, .ff-automations button:focus-visible {
+.ff-automation-field textarea { resize: vertical; font-family: monospace; }
+.ff-automations textarea:focus, .ff-automations input:focus, .ff-automations select:focus, .ff-automations button:focus-visible {
 	outline: 2px solid #36c;
 	outline-offset: 1px;
 }

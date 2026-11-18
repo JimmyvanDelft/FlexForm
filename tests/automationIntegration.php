@@ -18,6 +18,11 @@ $expect = static function ( $ok, string $label ) {
 	}
 	echo "PASS $label\n";
 };
+global $wgFlexFormConfig;
+$wgFlexFormConfig['AutomateOptions']['task']['fields']['body'] = [
+	'type' => 'textarea', 'slot' => 'main', 'default' => ''
+];
+$body = "{{Example\n|Value=Yes\n}}\n\n== Details ==\n* [taaknummer] stays literal";
 $services = MediaWikiServices::getInstance();
 $db = Events::db();
 if ( Rules::title()->exists() || Title::newFromText( 'Task/123' )->exists() ) {
@@ -50,7 +55,7 @@ $rule = [ 'id' => str_repeat( 'a', 24 ), 'name' => 'Review', 'enabled' => true,
 	'selector' => 'regex', 'pattern' => '^Task/[0-9]+$', 'slot' => $slot, 'template' => $template,
 	'parameter' => 'Status', 'operator' => 'equals', 'value' => 'Code Review', 'actions' => [
 		[ 'option' => 'archive', 'values' => [] ], [ 'option' => 'task', 'values' => [
-			'display' => 'Evaluatie [taaknummer]', 'status' => 'Gepland', 'type' => 'Review', 'projectMode' => 'source', 'project' => ''
+			'body' => $body, 'display' => 'Evaluatie [taaknummer]', 'status' => 'Gepland', 'type' => 'Review', 'projectMode' => 'source', 'project' => ''
 		] ]
 	] ];
 $write( Rules::page(), [ 'main' => new JsonContent( json_encode( [ 'schemaVersion' => 1, 'rules' => [ $rule ] ] ) ) ] );
@@ -98,6 +103,7 @@ $expect( $job->run(), 'follow-up job' );
 $target = 'Task/' . $row->event_id;
 $first = $rev( $target );
 $targetText = $first->getContent( $slot )->serialize();
+$expect( $first->getContent( 'main' )->serialize() === $body, 'textarea saved verbatim through jobqueue' );
 $expect( str_contains( $first->getContent( 'csp-base-props' )->serialize(), '|Title=Evaluatie 123' )
 	&& str_contains( $targetText, '|Status=Gepland' ), 'administrator title pattern and custom status' );
 $expect( str_contains( $targetText, '|Project=MinFin 2' ) && str_contains( $targetText, '|Task type=Review' ), 'source snapshot in created slots' );

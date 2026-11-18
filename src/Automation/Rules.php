@@ -79,6 +79,10 @@ class Rules {
 		if ( !$option || !in_array( $option['type'], [ 'set', 'create' ], true ) ) {
 			throw new InvalidArgumentException( 'Unknown automation option.' );
 		}
+		if ( $option['type'] === 'set' && ( $option['allowAnyParameter'] ?? false ) === true &&
+			( empty( $option['fixed']['slot'] ) || empty( $option['fixed']['template'] ) ) ) {
+			throw new InvalidArgumentException( 'Free parameters require a fixed slot and template.' );
+		}
 		$fields = $option['fields'] ?? [];
 		$values = $action['values'] ?? [];
 		if ( !is_array( $values ) || array_diff_key( $values, $fields ) ) {
@@ -86,9 +90,15 @@ class Rules {
 		}
 		foreach ( $fields as $key => $field ) {
 			$value = $values[$key] ?? $field['default'] ?? null;
-			if ( !is_string( $value ) || strlen( $value ) > 1024 ||
+			if ( !is_string( $value ) || strlen( $value ) > ( ( $field['type'] ?? 'text' ) === 'textarea' ? 65536 : 1024 ) ||
 				( isset( $field['choices'] ) && !in_array( $value, $field['choices'], true ) ) ) {
 				throw new InvalidArgumentException( "Invalid $key." );
+			}
+			if ( ( $field['type'] ?? 'text' ) === 'textarea' &&
+				( $option['type'] !== 'create' || empty( $field['slot'] ) ||
+					isset( $field['choices'] ) || isset( $option['fixed'][$key] ) ||
+					isset( $option['inherit'][$key] ) ) ) {
+				throw new InvalidArgumentException( 'Textarea requires a creation action and a fixed destination slot.' );
 			}
 			$values[$key] = $value;
 		}
@@ -96,7 +106,12 @@ class Rules {
 		if ( $option['type'] === 'set' && preg_match( '/[|{}<>\r\n]/u', $args['value'] ) ) {
 			throw new InvalidArgumentException( 'Enter a plain-text parameter value.' );
 		}
-		if ( $option['type'] === 'set' && !in_array( $args['parameter'], $option['parameters'], true ) ) {
+		if ( $option['type'] === 'set' && ( trim( $args['parameter'] ) === '' ||
+			preg_match( '/[=|{}<>\r\n\x00-\x1f\x7f]/u', $args['parameter'] ) ) ) {
+			throw new InvalidArgumentException( 'Invalid parameter name.' );
+		}
+		if ( $option['type'] === 'set' && ( $option['allowAnyParameter'] ?? false ) !== true &&
+			!in_array( $args['parameter'], $option['parameters'] ?? [], true ) ) {
 			throw new InvalidArgumentException( 'Parameter is not permitted.' );
 		}
 		return $args;

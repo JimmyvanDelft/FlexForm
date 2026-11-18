@@ -20,8 +20,10 @@ class Automations {
 		return $this->special->msg( 'flexform-automation-' . $key )->text();
 	}
 
-	private static function input( string $label, string $name, string $value, ?array $choices = null ): string {
-		if ( $choices === null ) {
+	private static function input( string $label, string $name, string $value, ?array $choices = null, bool $multiline = false ): string {
+		if ( $multiline ) {
+			$control = Html::element( 'textarea', [ 'name' => $name, 'rows' => 8 ], $value );
+		} elseif ( $choices === null ) {
 			$control = Html::input( $name, $value, 'text' );
 		} else {
 			$items = '';
@@ -201,7 +203,7 @@ class Automations {
 				$choices = $spec['choices'] ?? null;
 				$value = ( $action['option'] ?? '' ) === $key ? ( $action['values'][$field] ?? $spec['default'] ?? '' ) : ( $spec['default'] ?? '' );
 				$html .= self::input( $spec['label'] ?? $field, $name . "[values][$key][$field]", $value,
-					$choices ? array_combine( $choices, $choices ) : null );
+					$choices ? array_combine( $choices, $choices ) : null, ( $spec['type'] ?? 'text' ) === 'textarea' );
 				if ( isset( $spec['help'] ) ) {
 					$html .= Html::element( 'p', [ 'class' => 'ff-automation-help' ], $spec['help'] );
 				}

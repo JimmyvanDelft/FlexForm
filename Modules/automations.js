@@ -11,7 +11,7 @@
 		const option = row.querySelector( 'select' ).value;
 		row.querySelectorAll( '[data-option]' ).forEach( ( group ) => {
 			group.hidden = group.dataset.option !== option;
-			group.querySelectorAll( 'input,select' ).forEach( ( field ) => {
+			group.querySelectorAll( 'input,select,textarea' ).forEach( ( field ) => {
 				field.disabled = group.hidden;
 			} );
 		} );

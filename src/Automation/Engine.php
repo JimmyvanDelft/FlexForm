@@ -63,6 +63,13 @@ class Engine {
 						default => throw new RuntimeException( 'Unknown automation variable source.' )
 					};
 				}
+				$rawSlots = [];
+				foreach ( $option['fields'] ?? [] as $key => $field ) {
+					if ( ( $field['type'] ?? 'text' ) === 'textarea' ) {
+						$rawSlots[$field['slot']] = $args[$key];
+						unset( $args[$key] );
+					}
+				}
 				$args = array_map( static fn ( $value ) => strtr( $value, $variables ), $args );
 				if ( !$user->isRegistered() || !$user->definitelyCan( 'read', $title ) ) {
 					throw new RuntimeException( 'Automation requires an identified editor with read access.' );
@@ -86,8 +93,8 @@ class Engine {
 					}
 					$jobs[] = [
 						'rule' => $rule['id'], 'index' => $index, 'actor' => $user->getId(),
-						'title' => $option['title'], 'tokens' => $tokens, 'slots' => array_map(
-							static fn ( $text ) => strtr( $text, $tokens ), $option['slots']
+						'title' => $option['title'], 'tokens' => $tokens, 'slots' => $rawSlots + array_map(
+							static fn ( $text ) => strtr( $text, $tokens ), $option['slots'] ?? []
 						)
 					];
 				}

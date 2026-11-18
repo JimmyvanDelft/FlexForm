@@ -69,3 +69,47 @@ De beheerder kan **Parameter instellen** kiezen, een toegestane parameter select
 De installatie maakt verwijzingen beschikbaar via `variables`. De sleutels worden tussen vierkante haken gebruikt. `number` levert het laatste deel van de bronpaginatitel en `title` de volledige titel inclusief namespace. Zo levert `Evaluatie [taaknummer]` bij `Task/123` de titel `Evaluatie 123`. De interne paginanaam blijft uniek via `Task/$event`.
 
 Met `fields` bepaalt de installatie welke waarden de beheerder vrij invult. Een `default` geeft ook bestaande regels zonder dat veld een waarde. Een optionele `help` verschijnt onder het veld. Vaste presets kunnen naast deze algemene acties blijven bestaan.
+
+## Vrije parameternamen inschakelen
+
+De allowlist blijft standaard actief. Schakel vrije parameternamen expliciet in voor een afzonderlijke optie. Het slot en template moeten hierbij onder `fixed` staan. Laat de `choices` van het parameterveld weg om een invoerveld te tonen.
+
+```php
+$wgFlexFormConfig['AutomateOptions']['free-parameter'] = [
+	'label' => 'Vrije parameter instellen',
+	'type' => 'set',
+	'allowAnyParameter' => true,
+	'fixed' => [
+		'slot' => 'csp-class-props',
+		'template' => 'Csp class properties',
+	],
+	'fields' => [
+		'parameter' => [ 'label' => 'Parameternaam' ],
+		'value' => [ 'label' => 'Waarde' ],
+	],
+];
+```
+
+Een parameternaam moet niet-leeg zijn en mag geen controltekens of wikitextscheidingstekens bevatten. De bestaande beperkingen voor de parameterwaarde blijven gelden. Zonder `allowAnyParameter => true` controleert FlexForm de bestaande `parameters`-allowlist.
+
+## Multiline slotinhoud voor aanmaakacties
+
+Gebruik voor een veld `type => textarea` en geef het doelslot met `slot` op. Dit werkt uitsluitend voor `create`-opties. Het slot komt uit de installatieconfiguratie. De inhoud wordt letterlijk in dat slot opgeslagen, inclusief regeleinden en wikitext. Verwijzingen zoals `[taaknummer]` en dollarvariabelen worden in deze ruwe inhoud letterlijk bewaard.
+
+Voeg bijvoorbeeld aan de algemene taakoptie toe:
+
+```php
+$wgFlexFormConfig['AutomateOptions']['task']['fields']['body'] = [
+	'label' => 'Inhoud',
+	'type' => 'textarea',
+	'slot' => 'main',
+	'default' => '',
+	'help' => 'Wikitext voor de inhoud van de nieuwe pagina.',
+];
+```
+
+Een textarea overschrijft voor zijn doelslot de inhoud uit de vaste `slots`-map. Gebruik per slot één textarea. Een leeg main-slot blijft leeg. Voor andere slots volgt leegmaken de bestaande FlexForm-opslaglogica. Het slot moet op de wiki geregistreerd zijn en wikitext ondersteunen. Het veld mag niet tevens een keuzeveld, vaste waarde of overgenomen parameter zijn.
+
+Textarea-inhoud heeft een limiet van 65.536 bytes. Gewone tekstvelden behouden hun limiet van 1.024 bytes en de bestaande controles op wikitextstructuur. Ruwe inhoud wordt buiten de gewone tekstsubstituties gehouden en kan daardoor geen titel of andere templateparameters invullen.
+
+Bestaande configuratie en regels blijven werken. Geef een nieuw veld een `default` als oudere regels het veld nog missen. Beide mogelijkheden gebruiken dezelfde rechtencontroles, bronrevisietransactie en idempotente vervolgjob als bestaande acties. De reeds opgeslagen jobinhoud blijft een momentopname van de activerende bewerking.
